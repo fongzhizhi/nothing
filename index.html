@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <style>
+        #demoCanvas{
+            border: 1px solid #cdabdd;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="demoCanvas" width="300" height="200">
+        抱歉，你的浏览器不支持Canvas！
+    </canvas>
+
+<script>
+var canvas = document.getElementById('demoCanvas')
+var ctx = canvas.getContext('2d');
+
+
+/** 
+ * offset - 起始偏移量
+*/
+function draw(center, heart, startx, offset) {
+	// 清空画布
+	ctx.clearRect(0,0, canvas.width, canvas.height);
+
+	// 样式设置
+	ctx.lineWidth = 3
+	ctx.strokeStyle="rgb(65,105,225, 0.6)"
+	ctx.fillStyle="rgb(255, 0, 0, 0.5)"
+	ctx.setLineDash([8, 2]);
+  	ctx.lineDashOffset = -offset;
+	
+	// 绘制直线
+	ctx.beginPath()
+	var starty = center[1];
+	ctx.moveTo(startx, starty)
+	ctx.lineTo(center[0], starty)
+	ctx.stroke()
+	ctx.beginPath()
+	ctx.moveTo(center[0]*2 - startx, starty)
+	ctx.lineTo(center[0], starty)
+	ctx.stroke()
+	// 爱心
+	ctx.fill(heart);
+	ctx.stroke(heart);
+}
+
+// 绘制爱心
+function drawHeart(center) {
+	var origin = [0, 0];
+	var left_control = [[-75, -45], [-60, -120], [0, -75]];
+	var right_control = [[75, -45], [60, -120], [0, -75]];
+	var offset = [center[0] - origin[0], center[1] - origin[1]];
+	origin = offsetPoint(origin, offset);
+
+	var left_heart = new Path2D(getPath(origin, resetControl(left_control, offset)));
+	var right_heart = new Path2D(getPath(origin, resetControl(right_control, offset)));
+	left_heart.addPath(right_heart);
+	return left_heart;
+
+	function offsetPoint(point, offset) {
+		return [point[0] + offset[0], point[1] + offset[1]];
+	}
+
+	function resetControl(control, offset) {
+		var newCon = [];
+		control.forEach(point => {
+			newCon.push(offsetPoint(point, offset));
+		});
+		return newCon;
+	}
+
+	function getPath(center, control) {
+		let path = [];
+		path.push('M', center[0], center[1], 'C');
+		control.forEach(point => {
+			path.push(point[0], point[1]);
+		});
+		return path.join(' ');
+	}
+}
+
+// 动态执行
+function run(){
+	var offset = 0;
+	var center = [150, 100];
+	var heart = drawHeart(center);
+	setInterval(() => {
+		if(++offset > 20){
+			offset = 0;
+		}
+		draw(center, heart, 10, offset);
+	}, 50);
+}
+
+run();
+</script>
+</body>
+</html>
